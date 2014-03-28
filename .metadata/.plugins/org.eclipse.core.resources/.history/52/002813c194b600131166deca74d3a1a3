@@ -1,0 +1,5 @@
+fr.consumer.url = http://localhost:8080/Serveur/ServletAllee
+fr.consumer.httpClassName = fr.projet26.client.HttpClient
+fr.jms.url = tcp://localhost:8161
+
+log.location = C:\\Users\\saad\\Desktop\\Logs\\consumer.log

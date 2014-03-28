@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="schema.projet26.fr/m2i" 
+xmlns:tns="schema.projet26.fr/m2i" 
+
+xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+jaxb:extensionBindingPrefixes="xjc"
+
+ elementFormDefault="qualified">
+
+    <element name="saveArchiveRequest">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="idArchive" type="string"></attribute>
+    		<attribute name="auteur" type="string"></attribute>
+    		<attribute name="emplacement" type="anyURI"></attribute>
+    	</complexType>
+    </element>
+
+
+    <element name="getArchiveRequest">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="idArchive" type="string"></attribute>
+    		<attribute name="accountName" type="string"></attribute>
+    	</complexType>
+    </element>
+
+
+
+
+    <element name="saveArchiveResponse">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="inserted" type="boolean"></attribute>
+    		<attribute name="idArchive" type="string"></attribute>
+    		<attribute name="nomArchive" type="string"></attribute>
+    	</complexType>
+    </element>
+
+
+    <element name="getArchiveResponse">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="idArchive" type="string"></attribute>
+    		<attribute name="emplacement" type="anyURI"></attribute>
+    	</complexType>
+    </element>
+    
+    
+    
+
+
+
+    <element name="getPasswordRequest">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="login" type="string"></attribute>
+    	</complexType>
+    </element>
+
+    <element name="getPasswordResponse">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="password" type="string"></attribute>
+    		<attribute name="depotID" type="string"></attribute>
+    	</complexType>
+    </element>
+
+
+    <element name="removeArchiveRequest">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="idArchive" type="string"></attribute>
+    	</complexType>
+    </element>
+    
+    <element name="removeArchiveResponse">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="idArchive" type="string"></attribute>
+    		<attribute name="removed" type="boolean"></attribute>
+    	</complexType>
+    </element>
+
+    <element name="getArchivesListRequest">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="depotId" type="string"></attribute>
+    	</complexType>
+    </element>
+    
+    <element name="getArchivesListResponse">
+    	<complexType>
+    		<sequence>
+    			<element name="archives" type="tns:archiveInfo" maxOccurs="unbounded" minOccurs="0"></element>
+    		</sequence>
+    		<attribute name="identifiant" type="string"></attribute>
+    	</complexType>
+    </element>
+
+    <complexType name="archiveInfo">
+    	<attribute name="idArchive" type="string"></attribute>
+    	<attribute name="nomArchive" type="string"></attribute>
+    	<attribute name="dateCreation" type="date"></attribute>
+    	<attribute name="nomAuteur" type="string"></attribute>
+    </complexType>
+
+
+    <element name="getSearchResultsRequest">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="designation" type="string"></attribute>
+    		<attribute name="depotID" type="string"></attribute>
+    	</complexType>
+    </element>
+    
+    <element name="getSearchResultsResponse">
+    	<complexType>
+    		<sequence>
+    			<element name="archives" type="tns:archiveInfo" maxOccurs="unbounded" minOccurs="0"></element>
+    		</sequence>
+    		<attribute name="identifiant" type="string"></attribute>
+    	</complexType>
+    </element>
+
+    <element name="saveHistoryRequest">
+    	<complexType>
+    		<attribute name="depotID" type="string"></attribute>
+    		<attribute name="message" type="string"></attribute>
+    		<attribute name="date" type="date"></attribute>
+    	</complexType>
+    </element>
+
+    <element name="getHistoryRequest">
+    	<complexType>
+    		<sequence></sequence>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="depotID" type="string"></attribute>
+    	</complexType>
+    </element>
+    
+    <element name="getHistoryResponse">
+    	<complexType>
+    		<sequence>
+    			<element name="message" type="string" maxOccurs="unbounded" minOccurs="1"></element>
+    		</sequence>
+    		<attribute name="identifiant" type="string"></attribute>
+    	</complexType>
+    </element>
+</schema>

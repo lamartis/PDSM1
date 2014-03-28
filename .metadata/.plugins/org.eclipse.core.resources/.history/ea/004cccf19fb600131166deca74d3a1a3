@@ -1,0 +1,75 @@
+package com.traitement.presentation;
+
+import java.text.MessageFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import javax.xml.datatype.DatatypeFactory;
+
+import com.outils.Codeur;
+import com.outils.ConnectedUsers;
+import com.generatedClasses.integration.GetArchiveRequest;
+import com.generatedClasses.integration.SaveHistoryRequest;
+import com.generatedClasses.presentation.*;
+import com.interfaces.P2mInterface;
+
+public class ReadArchiveRequestTraitement extends TraitementP {
+
+	ReadArchiveRequest readArchiveRequest;
+	User user;
+
+	public ReadArchiveRequestTraitement(P2mInterface object, String idMessage, String correlationId){
+		super(object, idMessage, correlationId);
+		readArchiveRequest = (ReadArchiveRequest) requete;
+	}
+
+	@Override
+	public Void call() throws Exception {
+
+		//Vérification si l'user est connécté.
+		user = ConnectedUsers.get(readArchiveRequest.getIdentifiant());
+
+		if (user != null){
+			
+			//Prepare message à l'integration.
+			GetArchiveRequest getArchiveRequest = new GetArchiveRequest();
+			getArchiveRequest.setIdentifiant(readArchiveRequest.getIdentifiant());
+			getArchiveRequest.setIdArchive(readArchiveRequest.getIdArchive());
+			getArchiveRequest.setAccountName(user.getLogin());
+			
+			responseXMLMessage = Codeur.convert(getArchiveRequest);
+			
+			producerM2I.setMessage(responseXMLMessage, idMessage, idCorrelation);
+			poolProducers.submit(producerM2I);
+			
+			Thread.sleep(100);
+			//Save History//////////////////////////////////////////////////////////
+			GregorianCalendar gregorianCalendar = new GregorianCalendar();
+			gregorianCalendar.setTime(new Date());
+
+			SaveHistoryRequest saveHistoryRequest = new SaveHistoryRequest();
+			saveHistoryRequest.setDepotID(user.getDepoID());
+			saveHistoryRequest.setMessage(MessageFormat.format(properties.getProperty("history.zip.readed"), user.getLogin(), readArchiveRequest.getIdArchive()));
+			saveHistoryRequest.setDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar));
+
+			producerM2I.setMessage(Codeur.convert(saveHistoryRequest), "", "");
+			poolProducers.submit(producerM2I);
+			
+		} else {
+			
+			ReadArchiveResponse readArchiveResponse = new ReadArchiveResponse();
+			readArchiveResponse.setError(properties.getProperty("error.userNotConnected"));
+
+			responseXMLMessage = Codeur.convert(readArchiveResponse);
+					
+			producerM2P.setMessage(responseXMLMessage, idMessage, idMessage);
+			poolProducers.submit(producerM2P);
+			Thread.sleep(100);
+			
+		}
+		
+		return null;
+		
+	}
+
+}

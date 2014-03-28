@@ -1,0 +1,94 @@
+package com.traitement.integration;
+
+import java.io.File;
+import java.text.MessageFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import javax.xml.datatype.DatatypeFactory;
+
+import com.generatedClasses.integration.GetPasswordResponse;
+import com.generatedClasses.integration.SaveHistoryRequest;
+import com.generatedClasses.presentation.ConnectResponse;
+import com.generatedClasses.presentation.User;
+import com.generatedClasses.presentation.ConnectResponse.Response;
+import com.interfaces.M2iInterface;
+import com.outils.Codeur;
+import com.outils.ConnectedUsers;
+
+import com.outils.LoggerSingleton;
+
+public class GetPasswordResponseTraitement extends TraitementI {
+
+	GetPasswordResponse getPasswordResponse;
+	
+	public GetPasswordResponseTraitement(M2iInterface object, String idMessage, String correlationId){
+		super(object, idMessage, correlationId);
+		getPasswordResponse = (GetPasswordResponse) requete;
+	}
+	
+	public Void call() throws Exception {
+
+		User user = ConnectedUsers.get(getPasswordResponse.getIdentifiant());
+
+		//Préparer le message de réponse
+		ConnectResponse connectResponse = new ConnectResponse();
+
+		//Verification du Mot de passe de l'user.
+		if (user.getPassword().equals(getPasswordResponse.getPassword())){
+			LoggerSingleton.getInstance().addInfoLog(getPasswordResponse.getIdentifiant() + " : Le password est bon");
+
+			//Rajouter le depoID à l'user dans la MAP.
+			user.setDepoID(getPasswordResponse.getDepotID());
+			ConnectedUsers.set(getPasswordResponse.getIdentifiant(), user);
+
+			//Creer un dossier pour l'user.
+			File file = new File(servletContext.getRealPath(accountsFolder + user.getLogin()));
+			if (file.mkdir())
+				LoggerSingleton.getInstance().addInfoLog(getPasswordResponse.getIdentifiant() + " : Création du dossier avec succès : " + servletContext.getRealPath(accountsFolder + user.getLogin()));
+
+			//Preparer le message d'envoie à la présentation
+			Response response = new Response();
+			response.setIdentifiant(getPasswordResponse.getIdentifiant());
+			response.setAccess(true);
+			connectResponse.setResponse(response);
+
+			responseXMLMessage = Codeur.convert(connectResponse);
+
+			producerM2P.setMessage(responseXMLMessage, idMessage, idCorrelation);
+			poolProducers.submit(producerM2P);
+
+			//Save History//////////////////////////////////////////////////////////
+			GregorianCalendar gregorianCalendar = new GregorianCalendar();
+			gregorianCalendar.setTime(new Date());
+			
+			SaveHistoryRequest saveHistoryRequest = new SaveHistoryRequest();
+			saveHistoryRequest.setDepotID(user.getDepoID());
+			saveHistoryRequest.setMessage(MessageFormat.format(properties.getProperty("history.connected"), user.getLogin()));
+			saveHistoryRequest.setDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar));
+			
+			producerM2I.setMessage(Codeur.convert(saveHistoryRequest), "", "");
+			poolProducers.submit(producerM2I);
+
+		} else {
+			
+			LoggerSingleton.getInstance().addInfoLog(getPasswordResponse.getIdentifiant() + " : Password n'est pas correcte");
+
+			//Supprimer l'user de <<connectedUsers>>
+			ConnectedUsers.remove(getPasswordResponse.getIdentifiant());
+
+			//Preparer le message d'envoie à la présentation
+			Response response = new Response();
+			response.setIdentifiant(getPasswordResponse.getIdentifiant());
+			response.setAccess(false);
+			connectResponse.setResponse(response);
+			responseXMLMessage = Codeur.convert(connectResponse);
+
+			producerM2P.setMessage(responseXMLMessage, idMessage, idCorrelation);
+			poolProducers.submit(producerM2P);
+		}
+
+		return null;
+	}
+
+}

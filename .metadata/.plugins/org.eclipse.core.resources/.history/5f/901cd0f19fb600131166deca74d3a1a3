@@ -1,0 +1,52 @@
+package com.traitement.presentation;
+
+import com.generatedClasses.integration.GetArchivesListRequest;
+import com.generatedClasses.presentation.ListArchivesRequest;
+import com.generatedClasses.presentation.ListArchivesResponse;
+import com.generatedClasses.presentation.User;
+import com.interfaces.P2mInterface;
+import com.outils.Codeur;
+import com.outils.ConnectedUsers;
+import com.traitement.presentation.TraitementP;
+
+public class ListArchivesRequestTraitement extends TraitementP {
+
+	ListArchivesRequest listArchivesRequest = (ListArchivesRequest) requete;
+	User user;
+	
+	public ListArchivesRequestTraitement(P2mInterface object, String idMessage, String correlationId){
+		super(object, idMessage, correlationId);
+	}
+
+	@Override
+	public Void call() throws Exception {
+		
+		user = ConnectedUsers.get(listArchivesRequest.getIdentifiant());
+		
+		if (user != null){
+			
+			//Preparer le message à envoyer à l'integration.
+			GetArchivesListRequest getArchivesListRequest = new GetArchivesListRequest();
+			getArchivesListRequest.setIdentifiant(listArchivesRequest.getIdentifiant());
+			getArchivesListRequest.setDepotId(user.getDepoID());
+			
+			responseXMLMessage = Codeur.convert(getArchivesListRequest);
+			producerM2I.setMessage(responseXMLMessage, idMessage, idCorrelation);
+			poolProducers.submit(producerM2I);
+			
+		} else {
+			
+			ListArchivesResponse listArchivesResponse = new ListArchivesResponse();
+			listArchivesResponse.setError(properties.getProperty("error.userNotConnected"));
+			responseXMLMessage = Codeur.convert(listArchivesResponse);
+			
+			producerM2P.setMessage(responseXMLMessage, idMessage, idMessage);
+			poolProducers.submit(producerM2P);
+			Thread.sleep(100);
+		}
+		
+		return null;
+		
+	}
+
+}

@@ -1,0 +1,96 @@
+package com.traitement.presentation;
+
+import java.io.File;
+import java.text.MessageFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import javax.xml.datatype.DatatypeFactory;
+
+import com.generatedClasses.integration.SaveHistoryRequest;
+import com.generatedClasses.presentation.DisconnectRequest;
+import com.generatedClasses.presentation.DisconnectResponse;
+import com.generatedClasses.presentation.DisconnectResponse.Response;
+import com.generatedClasses.presentation.User;
+import com.interfaces.P2mInterface;
+import com.outils.Codeur;
+import com.outils.ConnectedUsers;
+import com.outils.LoggerSingleton;
+
+public class DisconnectRequestTraitement extends TraitementP {
+	
+	DisconnectRequest disconnectRequest = (DisconnectRequest) requete;
+	User user;
+	
+	public DisconnectRequestTraitement(P2mInterface object, String idMessage, String correlationId){
+		super(object, idMessage, correlationId);
+	}
+
+	@Override
+	public Void call() throws Exception {
+		
+		user = ConnectedUsers.get(disconnectRequest.getIdentifiant());
+		
+		if (user != null) {
+			
+			//Supprimer son dossier du Serveur.
+			this.deleteAccountFolder(servletContext.getRealPath(accountsFolder + user.getLogin()));
+			
+			//Supprimer l'user du <<connectedUsers>>
+			ConnectedUsers.remove(disconnectRequest.getIdentifiant());
+			
+			//Preparer le message d'envoie à la présentation.
+			Response response = new Response();
+			response.setIdentifiant(disconnectRequest.getIdentifiant());
+			response.setDisconnected(true);
+			
+			DisconnectResponse disconnectResponse = new DisconnectResponse();
+			disconnectResponse.setResponse(response);
+			
+			responseXMLMessage = Codeur.convert(disconnectResponse);
+			
+			//Save History//////////////////////////////////////////////////////////
+			GregorianCalendar gregorianCalendar = new GregorianCalendar();
+			gregorianCalendar.setTime(new Date());
+
+			SaveHistoryRequest saveHistoryRequest = new SaveHistoryRequest();
+			saveHistoryRequest.setDepotID(user.getDepoID());
+			saveHistoryRequest.setMessage(MessageFormat.format(properties.getProperty("history.disconnected"), user.getLogin()));
+			saveHistoryRequest.setDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar));
+
+			producerM2I.setMessage(Codeur.convert(saveHistoryRequest), "", "");
+			poolProducers.submit(producerM2I);
+			Thread.sleep(100);
+			
+		} else {
+			
+			System.out.println("L'user n'est pas connécté");
+
+			//Preparer le message d'envoie à la présentation.
+			DisconnectResponse disconnectResponse = new DisconnectResponse();
+			disconnectResponse.setError(properties.getProperty("error.userNotConnected"));
+			
+			responseXMLMessage = Codeur.convert(disconnectResponse);
+			
+		}
+		
+		producerM2P.setMessage(responseXMLMessage, idMessage, idMessage);
+		poolProducers.submit(producerM2P);
+		
+		return null;
+	}
+
+	private void deleteAccountFolder(String userFolderPath) {
+		
+		File folder = new File(userFolderPath);
+		File[] files = folder.listFiles();
+		for (File file : files) {
+			file.delete();
+		}
+		folder.delete();
+		
+		LoggerSingleton.getInstance().addInfoLog("Suppression du dossier User : " + userFolderPath);
+		
+	}
+
+}

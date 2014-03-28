@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.ui.externaltools.ProgramLaunchConfigurationType">
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="C:\Program Files\Java\jdk1.7.0_13\bin\xjc.exe"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-d src&#13;&#10;-p com.xsd.presentation&#13;&#10;-b C:\Users\saad\Desktop\NewPds\MetierProject\Serveur\WebContent\WEB-INF\schemas\personalisation.xml&#13;&#10;C:\Users\saad\Desktop\NewPds\MetierProject\Serveur\WebContent\WEB-INF\schemas\pm.xsd -extension"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="${workspace_loc:/Serveur}"/>
+</launchConfiguration>

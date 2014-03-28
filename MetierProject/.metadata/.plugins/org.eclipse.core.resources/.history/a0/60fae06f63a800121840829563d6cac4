@@ -1,0 +1,16 @@
+package com.servlets;
+
+
+public class Main {
+	private InputStream resourceAsStream;
+
+	Main(){
+		//C:\Users\saad\Desktop\NewPds\MetierProject\Serveur\src
+		InputStream s =  this.getClass().getResourceAsStream("../../WebContent/1fichier1.jar");
+		
+	//	InputStream s =  this.getClass().getResourceAsStream("../Serveur/fichier1.jar");
+		//System.out.println("s --> " + this.getClass().getResource("").toString());
+		//System.out.println("s --> " + this.getClass().getResource("/").toString());
+		System.out.println("s --> " + ServletContext.getResource("").toString());
+	}
+}

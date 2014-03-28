@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<typeInfoHistroy>
+<typeInfo handle="=Serveur/src&lt;com.traitement.integration{TraitementI.java[TraitementI" modifiers="1025" timestamp="1369431332338"/>
+<typeInfo handle="=Serveur/C:\/Users\/saad\/Desktop\/apache-tomcat-6.0.36\/lib\/servlet-api.jar&lt;javax.servlet(ServletContextListener.class[ServletContextListener" modifiers="1537" timestamp="1350378286000"/>
+<typeInfo handle="=Serveur/C:\/Users\/saad\/Desktop\/apache-tomcat-6.0.36\/lib\/servlet-api.jar&lt;javax.servlet(ServletContext.class[ServletContext" modifiers="1537" timestamp="1350378286000"/>
+<typeInfo handle="=Serveur/C:\/Program Files\/Java\/jdk1.7.0_13\/jre\/lib\/rt.jar&lt;sun.org.mozilla.javascript.internal(ContextListener.class[ContextListener" modifiers="1050113" timestamp="1360099193852"/>
+<typeInfo handle="=Serveur/C:\/Users\/saad\/Desktop\/apache-tomcat-6.0.36\/lib\/catalina.jar&lt;org.apache.catalina(SessionListener.class[SessionListener" modifiers="1537" timestamp="1350378286000"/>
+<typeInfo handle="=Serveur/C:\/Users\/saad\/Desktop\/apache-tomcat-6.0.36\/lib\/catalina.jar&lt;org.apache.catalina(Session.class[Session" modifiers="1537" timestamp="1350378286000"/>
+<typeInfo handle="=Producteur/C:\/Program Files\/Java\/jre7\/lib\/rt.jar&lt;java.lang(Runnable.class[Runnable" modifiers="1537" timestamp="1360099256973"/>
+</typeInfoHistroy>

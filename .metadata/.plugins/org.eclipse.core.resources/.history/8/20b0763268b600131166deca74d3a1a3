@@ -1,0 +1,85 @@
+package fr.projet26.consumer;
+
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.net.URL;
+import java.util.Properties;
+import javax.jms.*;
+
+import org.apache.activemq.ActiveMQConnectionFactory;
+
+import fr.projet26.interfaces.Client;
+
+public class Consumer implements MessageListener{
+
+	String queueName;
+	ConnectionFactory connectionFactory;
+	MessageConsumer consumer;
+	Connection connection;
+	Session session;
+	Client client;
+	
+	public Consumer(String nomProperty){
+		try{
+			
+			Properties prop = new Properties();
+			InputStream propFile =  this.getClass().getClassLoader().getResourceAsStream(nomProperty + ".properties");
+			prop.load(propFile);
+
+			connectionFactory = new ActiveMQConnectionFactory(prop.getProperty("fr.jms.url"));
+			
+			Class<?> classeTemp = Class.forName(prop.getProperty("fr.consumer.httpClassName")) ;
+			Constructor<?> classeDeTraitement = classeTemp.getDeclaredConstructor(URL.class);
+			client = (Client) (classeDeTraitement.newInstance(new URL(prop.getProperty("fr.consumer.url"))));
+			
+			LoggerSingleton.initialize(prop.getProperty("log.location"));
+			LoggerSingleton.getInstance().addInfoLog("Initialized Consumer [" + nomProperty + "]");
+			
+		} catch(Exception e){
+			System.out.println(e.getMessage());
+			System.out.println(e.getStackTrace());
+			//LoggerSingleton.getInstance().addWarningLog(e.getMessage());
+		}
+	}
+
+	public void doConnection(String queueName){
+		try{
+			this.queueName = queueName;
+			connection = connectionFactory.createConnection();
+			connection.start();
+
+			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			Destination destination = session.createQueue(queueName);
+
+			consumer = session.createConsumer(destination);
+			consumer.setMessageListener(this);
+		}catch (Exception e){
+			System.out.println(e.getMessage());
+			System.out.println(e.getStackTrace());
+			//LoggerSingleton.getInstance().addWarningLog(e.getMessage());
+		}
+	}
+
+	public void closeConnection(){
+		try{
+			connection.close();
+			LoggerSingleton.getInstance().addInfoLog("Consumer closed");
+		}catch (Exception e){
+			LoggerSingleton.getInstance().addWarningLog(e.getMessage());
+		}
+	}
+
+	@Override
+	public void onMessage(Message message) {
+		if(message instanceof TextMessage ){
+			TextMessage textMessage = (TextMessage) message;
+			try {
+				String sms = textMessage.getText() + "///" + textMessage.getJMSCorrelationID() + "///" + textMessage.getJMSMessageID();
+				this.client.sendMessage(sms);
+				LoggerSingleton.getInstance().addInfoLog(sms);
+			} catch (Exception e) {
+				LoggerSingleton.getInstance().addWarningLog(e.getMessage());
+			}
+		}		
+	}
+}

@@ -1,0 +1,62 @@
+package com.outils;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.generatedClasses.presentation.User;
+
+import com.outils.LoggerSingleton;
+
+public class ConnectedUsers {
+	private static ConnectedUsers instance;
+	private static Map<String, User> usersMap = new HashMap<String, User>();
+
+	public static synchronized ConnectedUsers getInstance() {
+		if (null == instance) { 
+			if (null == instance) {
+				instance = new ConnectedUsers();
+			}
+		}
+		return instance;
+	}
+
+	private ConnectedUsers() {}
+
+	public static synchronized User get(String identifiant) {
+		return usersMap.get(identifiant);
+	}
+	
+	public static synchronized int count() {
+		return usersMap.size();
+	}
+
+	public static synchronized void add(String identifiant, User user) {
+		usersMap.put(identifiant, user);
+		LoggerSingleton.getInstance().addInfoLog("New temporary jeton: [" + identifiant + "] for " + user.getLogin());
+	}
+	
+	public static synchronized void set(String identifiant, User user) {
+		usersMap.put(identifiant, user);
+		LoggerSingleton.getInstance().addInfoLog("Complete all user infos: [" + identifiant + "] for " + user.getLogin());
+	}
+	
+	public static synchronized void remove(String identifiant){
+		usersMap.remove(identifiant);
+		LoggerSingleton.getInstance().addInfoLog("[" + identifiant + "] removed with success");
+	}
+	
+	public static synchronized User findBy(String login, String password){
+		for (User user : usersMap.values()) {
+			if (user.getLogin().equals(login) && user.getPassword().equals(password))
+				return user;
+		}
+		return null;
+	}
+	
+	public static synchronized boolean findBy(String id){
+		if (usersMap.get(id) != null)
+			return true;
+		return false;
+	}
+	
+}

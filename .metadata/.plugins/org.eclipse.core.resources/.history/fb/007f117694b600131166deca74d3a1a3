@@ -1,0 +1,4 @@
+# START SNIPPET: jndi
+
+url = tcp://localhost:8161/
+log.location = C:\\Users\\saad\\Desktop\\Logs\\Producter.log

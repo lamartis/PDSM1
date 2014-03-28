@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="schema.projet26.fr/p2m" 
+xmlns:tns="schema.projet26.fr/p2m" 
+
+xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+jaxb:extensionBindingPrefixes="xjc"
+
+ elementFormDefault="qualified">
+
+    <complexType name="documentPPT">
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="nom" type="string"></attribute>
+    	<attribute name="date_creation" type="date"></attribute>
+    	<attribute name="nomAuteur" type="string"></attribute>
+    	<attribute name="emplacement" type="anyURI"></attribute>
+    </complexType>
+
+
+    <complexType name="user">
+    	<attribute name="login" type="string"></attribute>
+    	<attribute name="password" type="string"></attribute>
+    	<attribute name="depoID" type="string"></attribute>
+    	<attribute name="ip" type="string"></attribute>
+    </complexType>
+
+    <element name="createOrUpdatePPTRequest">
+    	<complexType>
+    		<sequence>
+    			<element name="document" type="tns:documentPPT"></element>
+    		</sequence>
+    		<attribute name="identifiant" type="string"></attribute>
+    	</complexType>
+    </element>
+
+
+    <element name="createOrUpdatePPTResponse">
+    	<complexType>
+    		<choice>
+    			<element name="response">
+    				<complexType>
+    					<attribute name="inserted" type="boolean"></attribute>
+    					<attribute name="idArchive" type="string"></attribute>
+    					<attribute name="nomArchive" type="string"></attribute>
+    				</complexType></element>
+    			<element name="Error" type="string"></element>
+    		</choice>
+    		<attribute name="identifiant" type="string"></attribute>
+    	</complexType>
+    </element>
+
+
+    
+
+
+    <element name="deleteArchiveRequest">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="idArchive" type="string"></attribute>
+    	</complexType>
+    </element>
+    
+    <element name="deleteArchiveResponse">
+    	<complexType>
+    		<choice>
+    			<element name="response">
+    				<complexType>
+    					<attribute name="idArchive" type="string"></attribute>
+    					<attribute name="deleted" type="boolean"></attribute>
+    				</complexType></element>
+    			<element name="Error" type="string"></element>
+    		</choice>
+    		<attribute name="identifiant" type="string"></attribute>
+    	</complexType>
+    </element>
+
+    
+
+
+    
+
+
+
+    
+
+    
+</schema>

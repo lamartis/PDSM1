@@ -1,0 +1,27 @@
+package com.servlets;
+
+import java.io.FileInputStream;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+
+import com.outils.LoggerSingleton;
+import com.outils.ServletContextSingleton;
+
+import fr.projet26.consumer.Consumer;
+import fr.projet26.producteur.Producer;
+
+public class MyContextListener implements ServletContextListener {
+	Producer producerM2P;
+	Producer producerM2I;
+	Consumer consumerI2M;
+	ExecutorService poolProducers;
+	Properties prop;
+	
+}

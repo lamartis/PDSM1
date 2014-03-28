@@ -1,0 +1,59 @@
+package fr.projet26.producteur;
+
+import java.io.InputStream;
+import java.util.Properties;
+import javax.jms.*;
+import org.apache.activemq.ActiveMQConnectionFactory;
+import fr.projet26.interfaces.JMSProducer;
+
+public class Producer implements JMSProducer {
+	Properties property = new Properties();
+	InputStream fis = this.getClass().getClassLoader().getResourceAsStream("config.properties");
+	String subject;
+	ConnectionFactory connectionFactory;
+	MessageProducer producer;
+	Connection connection;
+	Session session;
+	String message;
+
+	public Producer(String subject){
+		try{
+			property.load(fis);
+			connectionFactory = new ActiveMQConnectionFactory(property.getProperty("url"));
+			this.subject = subject;
+			connection = connectionFactory.createConnection();
+			connection.start();
+			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			Destination destination = session.createQueue(subject);
+			producer = session.createProducer(destination);
+
+			System.out.println("Initialized Producer: [" + subject + "]");
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public synchronized void setMessage(String m){
+		this.message = m;
+	}
+	
+	public Void call() throws Exception{
+		try{
+			TextMessage message = session.createTextMessage(this.message);
+			producer.send(message);
+			
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+		return null;
+	}
+
+	public void closeConnection(){
+		try{
+			connection.close();
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+	}
+
+}

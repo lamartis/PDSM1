@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+			   xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+               xmlns:inheritance="http://jaxb2-commons.dev.java.net/basic/inheritance"
+	           jaxb:extensionBindingPrefixes="xjc"
+               jaxb:version="2.0">
+  <jaxb:bindings schemaLocation="m2i.xsd">
+    <jaxb:globalBindings> 
+ 		<xjc:superInterface name="com.interfaces.M2iInterface"/>
+    </jaxb:globalBindings>
+  </jaxb:bindings>
+</jaxb:bindings>

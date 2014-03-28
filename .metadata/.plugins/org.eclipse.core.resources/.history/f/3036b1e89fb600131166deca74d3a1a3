@@ -1,0 +1,108 @@
+package com.traitement.integration;
+
+import java.io.File;
+import java.util.ArrayList;
+
+import com.generatedClasses.integration.GetArchiveRequest;
+import com.generatedClasses.integration.GetArchiveResponse;
+import com.generatedClasses.presentation.Archive;
+import com.generatedClasses.presentation.Element;
+import com.generatedClasses.presentation.ReadArchiveResponse;
+import com.generatedClasses.presentation.ReadArchiveResponse.Response;
+import com.generatedClasses.presentation.User;
+import com.interfaces.M2iInterface;
+import com.outils.Codeur;
+import com.outils.ConnectedUsers;
+import com.outils.LoggerSingleton;
+import com.outils.UnzipFile;
+
+public class GetArchiveResponseTraitement extends TraitementI {
+
+	GetArchiveResponse getArchiveResponse;
+	User user;
+	
+	public GetArchiveResponseTraitement(M2iInterface object, String idMessage, String correlationId){
+		super(object, idMessage, correlationId);
+		getArchiveResponse = (GetArchiveResponse) requete;
+	}
+	
+	private String getAbsolutPathFromURL(String url) {
+		return servletContext.getRealPath(accountsFolder + user.getLogin() + "/" + new File(url).getName());
+	}
+
+	@Override
+	public Void call() throws Exception {
+
+		user = ConnectedUsers.get(getArchiveResponse.getIdentifiant());
+		
+		//Vérifier si l'user est connecté.
+		if (user != null){
+			
+			//Vérifier si l'archive est bien uploadé par l'integration
+			if (new File(this.getAbsolutPathFromURL((getArchiveResponse.getEmplacement()))).exists()){
+				
+				try {
+					//Dézipper le Fichier Zip reçus, et je récupère la liste des noms d'archives.
+					ArrayList<String> filesName = UnzipFile.unzip(this.getAbsolutPathFromURL((getArchiveResponse.getEmplacement())), servletContext.getRealPath(accountsFolder + user.getLogin()));
+
+					//Creer l'objet Archive
+					Archive archive = new Archive();
+					archive.setIdArchive(getArchiveResponse.getIdArchive());
+
+					LoggerSingleton.getInstance().addInfoLog("idArchive: " + getArchiveResponse.getIdArchive());
+					LoggerSingleton.getInstance().addInfoLog("nomArchive: " + new File(getArchiveResponse.getEmplacement()).getName());
+
+					for (String fileName : filesName) {
+						Element element = new Element(); 
+						element.setEmplacement(projectUrl + accountsFolder + user.getLogin() + "/" + fileName); 
+						archive.getElement().add(element);
+						LoggerSingleton.getInstance().addInfoLog("-- Unziped file : " + servletContext.getRealPath(accountsFolder + user.getLogin() + "/" + fileName));
+					}
+
+					//Supprimer l'archive du Serveur.
+					File zipFile = new File(this.getAbsolutPathFromURL((getArchiveResponse.getEmplacement())));
+					LoggerSingleton.getInstance().addInfoLog("L'archive est supprimé : " + this.getAbsolutPathFromURL((getArchiveResponse.getEmplacement())));
+					zipFile.delete();
+
+					//Préparer le message à envoyer à l'integration.
+					Response response = new Response();
+					response.setArchive(archive);
+					ReadArchiveResponse readArchiveResponse = new ReadArchiveResponse();
+					readArchiveResponse.setIdentifiant(getArchiveResponse.getIdentifiant());
+					readArchiveResponse.setResponse(response);
+
+					responseXMLMessage = Codeur.convert(readArchiveResponse);
+					
+					producerM2P.setMessage(responseXMLMessage, idMessage, idCorrelation);
+					poolProducers.submit(producerM2P);
+					
+				} catch (Exception e) {
+					LoggerSingleton.getInstance().addWarningLog(e.getMessage());
+				}
+
+			} else {
+
+				LoggerSingleton.getInstance().addInfoLog("Error: L'archive n'est pas bien uploadé");
+				GetArchiveRequest getArchiveRequest = new GetArchiveRequest();
+				getArchiveRequest.setIdentifiant(getArchiveResponse.getIdentifiant());
+				getArchiveRequest.setIdArchive(getArchiveResponse.getIdArchive());
+				getArchiveRequest.setAccountName(user.getLogin());
+				
+				responseXMLMessage = Codeur.convert(getArchiveRequest);
+				
+				producerM2I.setMessage(responseXMLMessage, idMessage, idCorrelation);
+				poolProducers.submit(producerM2I);
+				
+			}
+			
+		} else {
+			
+			//On peut rien faire, vu que le dossier de l'user n'est pas présent pour faire la décompréssion.
+			LoggerSingleton.getInstance().addWarningLog("Error: L'user n'est plus connecté");
+			
+		}
+	
+		return null;
+	}
+
+}

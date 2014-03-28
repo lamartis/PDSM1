@@ -1,0 +1,8 @@
+import fr.projet26.producteur.Producer;
+
+
+public class Main {
+	public static void main(String[] args) {
+		producerM2P = new Producer("ReqMP");
+	}
+}

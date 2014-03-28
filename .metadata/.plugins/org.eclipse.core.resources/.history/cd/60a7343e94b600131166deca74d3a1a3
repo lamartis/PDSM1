@@ -1,0 +1,87 @@
+package fr.projet26.producteur;
+
+import java.io.InputStream;
+import java.util.Properties;
+import javax.jms.*;
+import org.apache.activemq.ActiveMQConnectionFactory;
+
+import fr.projet26.producteur.LoggerSingleton;
+import fr.projet26.interfaces.JMSProducer;
+
+public class Producer implements JMSProducer {
+	Properties property = new Properties();
+	InputStream fis = this.getClass().getClassLoader().getResourceAsStream("config.properties");
+	String subject;
+	ConnectionFactory connectionFactory;
+	MessageProducer producer;
+	Connection connection;
+	Session session;
+	String message, idMessage, idCorrelation;
+
+	public Producer(String subject){
+		try{
+			
+			property.load(fis);
+			System.out.println(property.getProperty("log.location"));
+			connectionFactory = new ActiveMQConnectionFactory(property.getProperty("url"));
+			this.subject = subject;
+			connection = connectionFactory.createConnection();
+			connection.start();
+			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			Destination destination = session.createQueue(subject);
+			producer = session.createProducer(destination);
+			
+			LoggerSingleton.initialize(property.getProperty("log.location"));
+			LoggerSingleton.getInstance().addInfoLog("Initialized Producter [" + subject + "]");
+			
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			//LoggerSingleton.getInstance().addWarningLog(e.getMessage());
+		}
+	}
+	
+	public synchronized void setMessage(String m, String idMessage, String idCorrelation){
+		this.message = m;
+		this.idMessage = idMessage;
+		this.idCorrelation = idCorrelation;
+	}
+	
+	@SuppressWarnings("static-access")
+	public Void call() throws Exception{
+		try{
+			TextMessage message = session.createTextMessage(this.message);
+			if (idCorrelation.isEmpty() && idMessage.isEmpty()){
+				producer.send(message);
+			} else if (idCorrelation.isEmpty() && !idMessage.isEmpty()){
+				producer.send(message);
+				CorrelationSingleton.getInstance().add(message.getJMSMessageID(), this.idMessage);
+			} else {
+				String $corrID = null;
+				if (CorrelationSingleton.getInstance().get(idCorrelation) == null) {
+					$corrID = idMessage;
+				} else {
+					$corrID = CorrelationSingleton.getInstance().get(idCorrelation);
+					CorrelationSingleton.getInstance().remove(idCorrelation);
+				}
+				message.setJMSCorrelationID($corrID);
+				producer.send(message);
+				
+			}
+			LoggerSingleton.getInstance().addInfoLog(" IDMessage: " + message.getJMSMessageID() + " || IDCorre: " + message.getJMSCorrelationID() + " || Message: " + message.getText());
+		}catch(Exception e){
+			LoggerSingleton.getInstance().addWarningLog(e.getMessage());
+		}
+		return null;
+	}
+
+	public void closeConnection(){
+		try{
+			connection.close();
+			LoggerSingleton.getInstance().addInfoLog("Producer closed");
+		}catch(Exception e){
+			LoggerSingleton.getInstance().addWarningLog(e.getMessage());
+		}
+	}
+
+}

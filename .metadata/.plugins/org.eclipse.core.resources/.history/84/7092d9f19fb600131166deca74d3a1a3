@@ -1,0 +1,63 @@
+package com.traitement.presentation;
+
+import java.util.UUID;
+
+import com.generatedClasses.integration.GetPasswordRequest;
+import com.generatedClasses.presentation.ConnectRequest;
+import com.generatedClasses.presentation.ConnectResponse;
+import com.generatedClasses.presentation.User;
+import com.interfaces.P2mInterface;
+import com.outils.Codeur;
+import com.outils.ConnectedUsers;
+import com.outils.LoggerSingleton;
+
+public class ConnectRequestTraitement extends TraitementP {
+
+	ConnectRequest connectRequest = (ConnectRequest) requete;
+	User user;
+
+	public ConnectRequestTraitement(P2mInterface object, String idMessage, String correlationId){
+		super(object, idMessage, correlationId);
+	}
+
+	public Void call() throws Exception {
+
+		//Vérifier si l'user est déja connecter.
+		user = ConnectedUsers.findBy(connectRequest.getUser().getLogin(), connectRequest.getUser().getPassword());
+
+		if (user != null){
+
+			LoggerSingleton.getInstance().addInfoLog("L'user est déjà connecté");
+
+			//Preparer le message à envoyer à la présentation.
+			ConnectResponse connectResponse = new ConnectResponse();
+			connectResponse.setError(properties.getProperty("error.userNotConnected"));
+			responseXMLMessage = Codeur.convert(connectResponse);
+			//La personne est déjà connecté, il ne peut pas etre connecter 2 fois.
+
+			producerM2P.setMessage(responseXMLMessage, idMessage, idMessage);
+			poolProducers.submit(producerM2P);
+
+		} else {
+
+			jeton = UUID.randomUUID();
+			//Ajouter l'user dans la Map <connectedUsers>
+			ConnectedUsers.add(jeton.toString(), connectRequest.getUser());
+
+			//Preparer le message à envoyer à l'integration.
+			GetPasswordRequest getPasswordRequest = new GetPasswordRequest();
+			getPasswordRequest.setIdentifiant(jeton.toString());
+			getPasswordRequest.setLogin(connectRequest.getUser().getLogin());
+
+			responseXMLMessage = Codeur.convert(getPasswordRequest);
+			//Demande de récupération du password de l'user, pour vérifier l'authentification.
+
+			producerM2I.setMessage(responseXMLMessage, idMessage, idCorrelation);
+			poolProducers.submit(producerM2I);
+
+		}
+		
+		return null;
+	}
+
+}
