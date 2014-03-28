@@ -15,5 +15,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/saad/Desktop/Jars/activemq-all-5.9.0.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.7.0_51/lib"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

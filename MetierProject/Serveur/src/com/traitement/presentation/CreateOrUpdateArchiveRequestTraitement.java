@@ -8,11 +8,7 @@ import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeFactory;
 
 import com.outils.Codeur;
-import com.outils.ConnectedUsers;
 import com.outils.LoggerSingleton;
-import com.outils.ZipFileWritter;
-import com.generatedClasses.integration.SaveArchiveRequest;
-import com.generatedClasses.integration.SaveHistoryRequest;
 import com.generatedClasses.presentation.*;
 import com.interfaces.P2mInterface;
 
