@@ -15,7 +15,7 @@ import com.outils.DecodeurP2M;
 import com.outils.LoggerSingleton;
 import com.traitement.presentation.TraitementP;
 
-import fr.projet26.consumer.Consumer;
+import fr.projet9.consumer.Consumer;
 
 public class ServletAllee extends HttpServlet {
 	private static final long serialVersionUID = 1L;

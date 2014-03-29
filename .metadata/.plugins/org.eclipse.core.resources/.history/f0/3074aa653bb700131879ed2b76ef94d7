@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="schema.projet26.fr/m2i" 
+xmlns:tns="schema.projet26.fr/m2i" 
+
+xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+jaxb:extensionBindingPrefixes="xjc"
+
+ elementFormDefault="qualified">
+
+    <element name="savePPTRequest">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="idDocument" type="string"></attribute>
+    		<attribute name="emplacement" type="anyURI"></attribute>
+    	</complexType>
+    </element>
+
+
+
+
+
+
+    <element name="savePPTResponse">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="inserted" type="boolean"></attribute>
+    		<attribute name="idDocument" type="string"></attribute>
+    		<attribute name="nomDocument" type="string"></attribute>
+    	</complexType>
+    </element>
+
+
+    
+    
+    
+
+
+
+
+
+
+    <element name="removePPTRequest">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="idDocument" type="string"></attribute>
+    	</complexType>
+    </element>
+    
+    <element name="removePPTResponse">
+    	<complexType>
+    		<attribute name="identifiant" type="string"></attribute>
+    		<attribute name="idDocument" type="string"></attribute>
+    		<attribute name="removed" type="boolean"></attribute>
+    	</complexType>
+    </element>
+
+    
+
+
+
+    
+
+
+    
+</schema>

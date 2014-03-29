@@ -4,8 +4,10 @@ import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
+import com.generatedClasses.integration.RemovePPTResponse;
 import com.generatedClasses.integration.SavePPTResponse;
 import com.generatedClasses.presentation.CreateOrUpdatePPTRequest;
+import com.generatedClasses.presentation.DeletePPTRequest;
 import com.generatedClasses.presentation.DocumentPPT;
 import com.outils.Codeur;
 
@@ -49,7 +51,26 @@ public class Main {
 		
 		/**
 		 * Sénario: remove File.
-		 * 
+		 * Présentation to Métier
 		 */
+		
+		DeletePPTRequest deletePPTRequest = new DeletePPTRequest();
+		deletePPTRequest.setIdentifiant(userID);
+		deletePPTRequest.setIdDocument("ID-PPT-111");
+		
+		System.out.println(Codeur.convert(deletePPTRequest));
+		
+		/**
+		 * Scénario: remove File
+		 * Integration to métier.
+		 */
+		
+		RemovePPTResponse removePPTResponse = new RemovePPTResponse();
+		removePPTResponse.setIdDocument("ID-PPT-111");
+		removePPTResponse.setIdentifiant(userID);
+		removePPTResponse.setNomDocument("file1.ppt");
+		removePPTResponse.setRemoved(true);
+		
+		System.out.println(Codeur.convert(removePPTResponse));
 	}
 }

@@ -14,8 +14,8 @@ import javax.servlet.ServletContextListener;
 import com.outils.LoggerSingleton;
 import com.outils.ServletContextSingleton;
 
-import fr.projet26.consumer.Consumer;
-import fr.projet26.producteur.Producer;
+import fr.projet9.consumer.Consumer;
+import fr.projet9.producteur.Producer;
 
 public class MyContextListener implements ServletContextListener {
 	Producer producerM2P;

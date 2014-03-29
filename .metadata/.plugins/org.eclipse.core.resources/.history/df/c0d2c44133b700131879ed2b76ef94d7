@@ -1,0 +1,55 @@
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+
+import com.generatedClasses.integration.SavePPTResponse;
+import com.generatedClasses.presentation.CreateOrUpdatePPTRequest;
+import com.generatedClasses.presentation.DocumentPPT;
+import com.outils.Codeur;
+
+public class Main {
+	public static void main(String[] args) throws DatatypeConfigurationException {
+		/**
+		 * Scénario: Add or update file.
+		 * Création du message qui vient de la présentation
+		 */
+		
+		String userID = "12-ID";
+		String auteur = "auteur1";
+		
+		GregorianCalendar gregorianCalendar = new GregorianCalendar();
+		gregorianCalendar.setTime(new Date());
+		
+		DocumentPPT documentPPT = new DocumentPPT();
+		documentPPT.setEmplacement("/12-ID/file1.ppt");
+		documentPPT.setNom("Fichier PPT");
+		documentPPT.setNomAuteur(auteur);
+		documentPPT.setDateCreation(DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar));
+		
+		CreateOrUpdatePPTRequest createOrUpdatePPTRequest = new CreateOrUpdatePPTRequest();
+		createOrUpdatePPTRequest.setIdentifiant(userID);
+		createOrUpdatePPTRequest.setDocument(documentPPT);
+		
+		System.out.println(Codeur.convert(createOrUpdatePPTRequest));
+		
+		/**
+		 * Scénario: add or update file .
+		 * Création du message qui vient de l'integration.
+		 */
+		
+		SavePPTResponse savePPTResponse = new SavePPTResponse();
+		savePPTResponse.setIdDocument("ID-PPT-111");
+		savePPTResponse.setIdentifiant(userID);
+		savePPTResponse.setInserted(true);
+		savePPTResponse.setNomDocument("file1.ppt");
+		
+		System.out.println(Codeur.convert(savePPTResponse));
+		
+		/**
+		 * Sénario: remove File.
+		 * 
+		 */
+	}
+}

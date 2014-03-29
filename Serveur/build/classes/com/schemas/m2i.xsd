@@ -52,6 +52,7 @@ jaxb:extensionBindingPrefixes="xjc"
     	<complexType>
     		<attribute name="identifiant" type="string"></attribute>
     		<attribute name="idDocument" type="string"></attribute>
+    		<attribute name="nomDocument" type="string"></attribute>
     		<attribute name="removed" type="boolean"></attribute>
     	</complexType>
     </element>

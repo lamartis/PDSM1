@@ -1,11 +1,6 @@
 package com.traitement.presentation;
 
 import java.io.File;
-import java.text.MessageFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
-
-import javax.xml.datatype.DatatypeFactory;
 
 import com.outils.Codeur;
 import com.outils.LoggerSingleton;

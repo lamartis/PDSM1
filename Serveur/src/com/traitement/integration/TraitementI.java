@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutorService;
 import javax.servlet.ServletContext;
 import com.interfaces.M2iInterface;
 import com.outils.ServletContextSingleton;
-import fr.projet26.producteur.Producer;
+import fr.projet9.producteur.Producer;
 
 public abstract class TraitementI implements Callable<Void> {
 
