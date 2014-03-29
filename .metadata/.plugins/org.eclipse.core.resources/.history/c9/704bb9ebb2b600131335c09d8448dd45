@@ -1,0 +1,19 @@
+import com.generatedClasses.presentation.CreateOrUpdatePPTRequest;
+import com.generatedClasses.presentation.DocumentPPT;
+
+
+public class Main {
+	public static void main(String[] args) {
+		String userID = "12-ID";
+		String auteur = "auteur1";
+		
+		DocumentPPT documentPPT = new DocumentPPT();
+		documentPPT.setEmplacement("/12-ID/file1.ppt");
+		documentPPT.setNom("Fichier PPT");
+		documentPPT.setNomAuteur("");
+		
+		CreateOrUpdatePPTRequest createOrUpdatePPTRequest = new CreateOrUpdatePPTRequest();
+		createOrUpdatePPTRequest.setIdentifiant(userID);
+		createOrUpdatePPTRequest.setDocument(value);
+	}
+}

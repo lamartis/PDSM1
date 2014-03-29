@@ -1,0 +1,138 @@
+package com.traitement.presentation;
+
+import java.io.File;
+import java.text.MessageFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import javax.xml.datatype.DatatypeFactory;
+
+import com.outils.Codeur;
+import com.outils.LoggerSingleton;
+import com.generatedClasses.presentation.*;
+import com.interfaces.P2mInterface;
+
+public class CreateOrUpdatePPTRequestTraitement extends TraitementP {
+
+	CreateOrUpdatePPTRequest createOrUpdatePPTRequest;
+
+	public CreateOrUpdatePPTRequestTraitement(P2mInterface object, String idMessage, String correlationId){
+		super(object, idMessage, correlationId);
+		createOrUpdatePPTRequest = (CreateOrUpdatePPTRequest) requete;
+	}
+
+	public boolean verifyAllFileBeforeSending(){
+		//Je verifie pour chaque emplacement d'element s'il existe bien, dans le serveur.
+		LoggerSingleton.getInstance().addInfoLog("Verify All elements :");
+		try {
+			File file = new File( this.getAbsolutPathFromURL(createOrUpdatePPTRequest.getDocument().getEmplacement()));
+			LoggerSingleton.getInstance().addInfoLog("Result : " + file.exists());
+			if (!file.exists()) 
+				return false;
+		} catch (Exception e) {
+			LoggerSingleton.getInstance().addWarningLog(e.getMessage());
+		}
+
+		LoggerSingleton.getInstance().addInfoLog(properties.getProperty("message.verification"));
+		return true;
+	}
+
+	private String getAbsolutPathFromURL(String url) {
+		return servletContext.getRealPath(accountsFolder + user.getLogin() + "/" + new File(url).getName());
+	}
+
+	public void createZip(){
+
+		//Récuperer le Login de l'user, pour pouvoir enregister le zip sur son dossier.
+		File file;
+		try {
+			String newArchiveLocation = servletContext.getRealPath(accountsFolder + user.getLogin() + "/" + createOrUpdateArchiveRequest.getArchive().getNomArchive());
+			ZipFileWritter zip = new ZipFileWritter(newArchiveLocation);
+			for (Element element : createOrUpdateArchiveRequest.getArchive().getElement()) {
+				//Ajouter le fichier dans l'archive
+				zip.addFile(getAbsolutPathFromURL(element.getEmplacement()));
+				//Supprimer le fichier après l'avoir compresser
+				file = new File(getAbsolutPathFromURL(element.getEmplacement()));
+				file.delete();
+				LoggerSingleton.getInstance().addInfoLog(" --add file : " + getAbsolutPathFromURL(element.getEmplacement()));
+			}
+			zip.close();
+		} catch (Exception e) {
+			LoggerSingleton.getInstance().addWarningLog(e.getMessage());
+		}
+
+		if (createOrUpdateArchiveRequest.getArchive().getIdArchive() == null) 
+			LoggerSingleton.getInstance().addInfoLog(MessageFormat.format(properties.getProperty("message.zip.created"), createOrUpdateArchiveRequest.getArchive().getNomArchive()));
+		else 
+			LoggerSingleton.getInstance().addInfoLog(MessageFormat.format(properties.getProperty("message.zip.updated"), createOrUpdateArchiveRequest.getArchive().getNomArchive()));
+
+	}
+
+	public Void call() throws Exception {
+		//Vérification si l'user est connécté.
+		user = ConnectedUsers.get(createOrUpdateArchiveRequest.getIdentifiant());
+
+		//Verification des fichiers.
+		if (user == null){
+
+			CreateOrUpdateArchiveResponse createOrUpdateArchiveResponse = new CreateOrUpdateArchiveResponse();
+			createOrUpdateArchiveResponse.setIdentifiant(createOrUpdateArchiveRequest.getIdentifiant());
+			createOrUpdateArchiveResponse.setError(properties.getProperty("error.userNotConnected"));
+
+			//Convertir l'object SaveArchiveRequest en XML pour l'envoyer au JMS.
+			responseXMLMessage = Codeur.convert(createOrUpdateArchiveResponse);
+
+			producerM2P.setMessage(responseXMLMessage, idMessage, idMessage);
+			poolProducers.submit(producerM2P);
+
+		} else if (!this.verifyAllFilesBeforeSending()){
+
+			CreateOrUpdateArchiveResponse createOrUpdateArchiveResponse = new CreateOrUpdateArchiveResponse();
+			createOrUpdateArchiveResponse.setIdentifiant(createOrUpdateArchiveRequest.getIdentifiant());
+			createOrUpdateArchiveResponse.setError(properties.getProperty("error.elements"));
+
+			//Convertir l'object SaveArchiveRequest en XML pour l'envoyer au JMS.
+			responseXMLMessage = Codeur.convert(createOrUpdateArchiveResponse);
+
+			producerM2P.setMessage(responseXMLMessage, idMessage, idMessage);
+			poolProducers.submit(producerM2P);
+
+			historyMessage = MessageFormat.format(properties.getProperty("history.zip.createOrUpdateZipError"), user.getLogin(), createOrUpdateArchiveRequest.getArchive().getNomArchive());
+
+		} else {
+			//Creation de l'archive
+			createZip();
+
+			//Creation de l'object de réponse: SaveArchiveRequest.
+			SaveArchiveRequest saveArchiveRequest = new SaveArchiveRequest();
+			saveArchiveRequest.setIdArchive(createOrUpdateArchiveRequest.getArchive().getIdArchive());
+			saveArchiveRequest.setIdentifiant(createOrUpdateArchiveRequest.getIdentifiant());
+			saveArchiveRequest.setAuteur(user.getLogin());
+			saveArchiveRequest.setEmplacement(projectUrl + accountsFolder + user.getLogin() + "/" + createOrUpdateArchiveRequest.getArchive().getNomArchive());
+
+			//Convertir l'object SaveArchiveRequest en XML pour l'envoyer au JMS.
+			responseXMLMessage = Codeur.convert(saveArchiveRequest);
+
+			producerM2I.setMessage(responseXMLMessage, idMessage, idCorrelation);
+			poolProducers.submit(producerM2I);
+
+			historyMessage = MessageFormat.format(properties.getProperty("history.zip.createOrUpdateZip"), user.getLogin(), createOrUpdateArchiveRequest.getArchive().getNomArchive());
+		}
+
+		Thread.sleep(100);
+		//Save History//////////////////////////////////////////////////////////
+		GregorianCalendar gregorianCalendar = new GregorianCalendar();
+		gregorianCalendar.setTime(new Date());
+
+		SaveHistoryRequest saveHistoryRequest = new SaveHistoryRequest();
+		saveHistoryRequest.setDepotID(user.getDepoID());
+		saveHistoryRequest.setMessage(historyMessage);
+		saveHistoryRequest.setDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar));
+
+		producerM2I.setMessage(Codeur.convert(saveHistoryRequest), "", "");
+		poolProducers.submit(producerM2I);
+
+		return null;
+	}
+
+}

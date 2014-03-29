@@ -1,0 +1,53 @@
+package com.traitement.integration;
+
+import java.io.File;
+
+import com.generatedClasses.integration.SaveArchiveResponse;
+import com.generatedClasses.integration.SavePPTResponse;
+import com.generatedClasses.presentation.CreateOrUpdateArchiveResponse;
+import com.generatedClasses.presentation.CreateOrUpdateArchiveResponse.Response;
+import com.generatedClasses.presentation.CreateOrUpdatePPTResponse;
+import com.generatedClasses.presentation.User;
+import com.interfaces.M2iInterface;
+import com.outils.Codeur;
+import com.outils.ConnectedUsers;
+import com.outils.LoggerSingleton;
+
+public class SavePPTResponseTraitement extends TraitementI {
+
+	SavePPTResponse savePPTResponse;
+
+	public SavePPTResponseTraitement(M2iInterface object, String idMessage, String correlationId){
+		super(object, idMessage, correlationId);
+		savePPTResponse = (SavePPTResponse) requete;
+	}
+
+	public Void call() throws Exception {
+
+		//Vérification si le fichier PPT est bien inséré.
+		if (!savePPTResponse.isInserted())
+			new File(servletContext.getRealPath(accountsFolder + savePPTResponse.getIdentifiant() + "/" + savePPTResponse.getNomDocument())).delete();
+		
+
+
+
+		//Creation d'objet de réponse.
+		CreateOrUpdatePPTResponse createOrUpdatePPTResponse = new CreateOrUpdatePPTResponse();
+		createOrUpdateArchiveResponse.setIdentifiant(saveArchiveResponse.getIdentifiant());
+
+		Response response = new Response();
+		response.setIdArchive(saveArchiveResponse.getIdArchive());
+		response.setNomArchive(saveArchiveResponse.getNomArchive());
+		response.setInserted(saveArchiveResponse.isInserted());
+
+		createOrUpdateArchiveResponse.setResponse(response);
+		responseXMLMessage = Codeur.convert(createOrUpdateArchiveResponse);
+
+		producerM2P.setMessage(responseXMLMessage, idMessage, idCorrelation);
+		poolProducers.submit(producerM2P);
+
+		return null;
+
+	}
+
+}

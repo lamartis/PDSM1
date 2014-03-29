@@ -1,0 +1,26 @@
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import com.generatedClasses.presentation.CreateOrUpdatePPTRequest;
+import com.generatedClasses.presentation.DocumentPPT;
+
+
+public class Main {
+	public static void main(String[] args) {
+		String userID = "12-ID";
+		String auteur = "auteur1";
+		
+		GregorianCalendar gregorianCalendar = new GregorianCalendar();
+		gregorianCalendar.setTime(new Date());
+		
+		DocumentPPT documentPPT = new DocumentPPT();
+		documentPPT.setEmplacement("/12-ID/file1.ppt");
+		documentPPT.setNom("Fichier PPT");
+		documentPPT.setNomAuteur(auteur);
+		documentPPT.setDateCreation(gregorianCalendar);
+		
+		CreateOrUpdatePPTRequest createOrUpdatePPTRequest = new CreateOrUpdatePPTRequest();
+		createOrUpdatePPTRequest.setIdentifiant(userID);
+		createOrUpdatePPTRequest.setDocument(value);
+	}
+}

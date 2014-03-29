@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Copy element &apos;JMSProducer.java&apos; to &apos;Serveur/src/com.interfaces&apos;&#x0D;&#x0A;- Original project: &apos;Producteur&apos;&#x0D;&#x0A;- Destination element: &apos;Serveur/src/com.interfaces&apos;&#x0D;&#x0A;- Original element: &apos;fr.projet26.interfaces.JMSProducer.java&apos;" description="Copy compilation unit" destination="=Serveur/src&lt;com.interfaces" element1="/src&lt;fr.projet26.interfaces{JMSProducer.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1366982918832" units="1" version="1.0"/>
-</session>
